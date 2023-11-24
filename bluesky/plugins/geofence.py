@@ -280,3 +280,19 @@ class Geofence(areafilter.Poly):
                     
         bs.traf.geo_intrusions = cls.unique_intrusions
         return
+    
+    @stack.command
+    def importgeofences(height: float, *area: str):
+        if len(area)==4:
+            geofence_str = envimport.envimport(area,height)[1]
+        elif len(area)==1:
+            area = area[0]
+            geofence_str = envimport.envimport(area, height)[1]
+        else:
+            bs.scr.echo(f'Please provide a cityname or bounding box in the form (Lat_min Lon_min Lat_max Lon_max)')
+
+        for geofence in geofence_str:
+            geofence_name = geofence[0]
+            coordinates = " ".join(geofence[1:])
+            stack.stack(f"geofence {geofence_name} {9000} {0} {coordinates}")
+        return
