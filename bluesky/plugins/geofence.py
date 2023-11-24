@@ -15,7 +15,7 @@ except ImportError:
 
 import bluesky as bs
 from bluesky import stack
-from bluesky.tools import aero, areafilter, geo
+from bluesky.tools import aero, areafilter, geo, envimport
 
 bs.settings.set_variable_defaults(geofence_dtlookahead=30)
 
