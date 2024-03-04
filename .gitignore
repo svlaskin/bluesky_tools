@@ -1,6 +1,5 @@
 # Automatically generated directories and files
 output
-plugins
 cache
 scenario/ic.scn
 bluesky/resources/grib
