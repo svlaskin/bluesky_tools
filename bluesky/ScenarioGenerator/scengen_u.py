@@ -61,8 +61,11 @@ def write_to_batch(text,fname):
 
 def write_lines_to_scen(heading,speed):
     # Basic setup for sim
+    write_line(text="asas on", hdg=heading, spd=speed)
     write_line(text="plugin load adsl", hdg=heading, spd=speed) # load adsl plugin
     write_line(text="plugin load DetectADSL", hdg=heading, spd=speed) # load detection
+    write_line(text="asas detectADSL", hdg=heading, spd=speed) # detection -> set correct
+    write_line(text="reso MVP", hdg=heading, spd=speed) # MVP on
     # one more for loggers needed!!
 
     # Spawn ownship, always same position
