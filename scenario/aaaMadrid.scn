@@ -1,0 +1,30 @@
+00:00:00.00>TRAILS ON
+
+# eham sid
+00:00:00.00>defwpt am084 52'23'42.7 004'42'54.5
+00:00:00.00>defwpt am045 52'20'20.4 004'49'27.4
+00:00:00.00>defwpt am036 52'15'25.4 004'50'52.4
+00:00:00.00>defwpt am072 52'01'14.1 004'50'34.8
+
+# start flight
+00:00:00.00>cre klm007 b737 52.33069 4.708861 2 
+00:00:00.00>addwpt klm007 am084
+00:00:00.00>addwpt klm007 am045
+00:00:00.00>addwpt klm007 am036
+00:00:00.00>addwpt klm007 am072
+00:00:00.00>addwpt klm007 lekko
+00:00:00.00>addwpt klm007 laras
+00:00:00.00>addwpt klm007 woody
+00:00:00.00>addwpt klm007 nik121
+00:00:00.00>addwpt klm007 civeb
+00:00:00.00>addwpt klm007 lesdo
+00:00:00.00>addwpt klm007 kovin
+00:00:00.00>addwpt klm007 pgs
+00:00:00.00>addwpt klm007 resmi
+00:00:00.00>addwpt klm007 dekod
+00:00:00.00>addwpt klm007 disak
+00:00:00.00>addwpt klm007 dirmo
+00:00:00.00>addwpt klm007 artax
+00:00:00.00>addwpt klm007 bebix
+00:00:00.00>dest klm007 lemd
+
