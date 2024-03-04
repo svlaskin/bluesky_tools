@@ -1,0 +1,4 @@
+plugin load adsl
+plugin load DetectADSL
+0:00:00>CRE own M600 50 4 0 100 40
+0:00:00>CRE int M600 49.9820093609335 3.999022987030019 2 100 15
