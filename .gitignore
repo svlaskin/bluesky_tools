@@ -94,3 +94,4 @@ ssd.obj
 *-checkpoint.py
 *-checkpoint.ipynb
 .ropeproject/config.py
+bluesky/SashaExperiments/
