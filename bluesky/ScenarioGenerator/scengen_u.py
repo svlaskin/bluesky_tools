@@ -30,6 +30,7 @@ radius = 2000 # radius of conflict circle [m]
 theta_res = 1 # angular resolution [deg]
 rpz = 50/nm # [m], converted to nm
 dtlook = 15 #[s]
+own_spd = 20 # [kts]
 # downlat, downlon, uplat, uplon = '52.2781742', '4.7287563', '52.4310638', '5.0791622'
 
 """
@@ -78,7 +79,7 @@ def write_lines_to_scen(heading,speed):
 
 
     # Spawn ownship, always same position. ID D1 for ownship.
-    text = f"{bstime(0)}>CRE D1 M600 {ownship_spawnloc[0]} {ownship_spawnloc[1]} 0 100 40" # ownship parameters are not varied
+    text = f"{bstime(0)}>CRE D1 M600 {ownship_spawnloc[0]} {ownship_spawnloc[1]} 0 100 {own_spd}" # ownship parameters are not varied
     write_line(text=text, hdg=heading, spd=speed) # hdg and speed only used for filename purposes here
 
     # Spawn Intruder: need rel. heading and speed. ID is D2.
@@ -97,7 +98,7 @@ Scenario Generator loop
 """
 
 rel_headings = np.arange(0,360,1) # 1 degree increments of rel. headings
-v_intruder = [15, 25, 40] 
+v_intruder =  [5, 15, 25, 35] # [kts]
 
 # one speed-heading combo is a unique file
 for hdg in rel_headings:
