@@ -56,7 +56,8 @@ class ADSL(ADSB):
 
         self.set_nav_noise(True)
         self.set_comm_parameter(False, False)
-
+        self.update_prob = 1.0
+        
         self.comm_noise = True
         self.comm_std_dev = 5
 
@@ -69,7 +70,7 @@ class ADSL(ADSB):
     def set_nav_noise(self, cond):
         self.nav_noise = cond
         self.hpos_noise_m = 1.5 # in meter, one standard deviation
-        self.gs_noise_ms = 1.5 # in m/s, one standard deviation
+        self.gs_noise_ms = 0.0 # in m/s, one standard deviation
 
     def set_comm_parameter(self, cond_trunc, cond_reso):
         self.comm_trunc = cond_trunc
@@ -97,7 +98,7 @@ class ADSL(ADSB):
 
         if(self.comm_noise):
             time_elapsed = sim.simt - self.lastupdate
-            update_prob = halfnorm.cdf(time_elapsed, loc=0, scale=self.comm_std_dev)
+            update_prob = self.update_prob
             up = np.where(np.random.random(size = traf.ntraf) < update_prob)
         else:
             up = np.array([True] * traf.ntraf)
@@ -314,6 +315,11 @@ class ADSL(ADSB):
         
         return delta_lat, delta_lon
 
+
+    @core.timed_function(name="print_param_adsl", dt=0.5)
+    def print_param_adsl(self):
+        stack.stack('ECHO hpos_noise: {}, update_prob: {}'.format(self.hpos_noise_m, self.update_prob))
+        return
 
     @stack.command(name='ADSL_HPOS_NOISE')
     def set_adsl_hpos_noise(self, hpos_noise: float = 1.5):
