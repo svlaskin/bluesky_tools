@@ -61,12 +61,15 @@ def write_to_batch(text,fname):
 
 def write_lines_to_scen(heading,speed):
     # Basic setup for sim
-    write_line(text="asas on", hdg=heading, spd=speed)
-    write_line(text="plugin load adsl", hdg=heading, spd=speed) # load adsl plugin
-    write_line(text="plugin load DetectADSL", hdg=heading, spd=speed) # load detection
-    write_line(text="asas detectADSL", hdg=heading, spd=speed) # detection -> set correct
-    write_line(text="reso MVP", hdg=heading, spd=speed) # MVP on
-    # one more for loggers needed!!
+    write_line(text="00:00:00.00> asas on", hdg=heading, spd=speed)
+    write_line(text="00:00:00.00> plugin load adsl", hdg=heading, spd=speed) # load adsl plugin
+    write_line(text="00:00:00.00> plugin load DetectADSL", hdg=heading, spd=speed) # load detection
+    write_line(text="00:00:00.00> asas detectADSL", hdg=heading, spd=speed) # detection -> set correct
+    write_line(text="00:00:00.00> reso MVP", hdg=heading, spd=speed) # MVP on
+    write_line(text="00:00:00.00> plugin load m22logger", hdg=heading, spd=speed) # log
+    write_line(text="00:00:00.00> pan 50 4", hdg=heading, spd=speed)
+    write_line(text="00:00:00.00> zoom 2", hdg=heading, spd=speed)
+    write_line(text="00:00:00.00> plugin load traffichandler", hdg=heading, spd=speed) # handler
 
     # Spawn ownship, always same position
     text = f"{bstime(0)}>CRE own M600 {ownship_spawnloc[0]} {ownship_spawnloc[1]} 0 100 40" # ownship parameters are not varied

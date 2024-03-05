@@ -1,4 +1,8 @@
-plugin load adsl
-plugin load DetectADSL
+00:00:00.00> asas on
+00:00:00.00> plugin load adsl
+00:00:00.00> plugin load DetectADSL
+00:00:00.00> asas detectADSL
+00:00:00.00> reso MVP
+00:00:00.00> plugin load m22logger
 0:00:00>CRE own M600 50 4 0 100 40
 0:00:00>CRE int M600 49.98842681675998 3.9785516897781514 50 100 40
