@@ -35,7 +35,7 @@ class M22Logger(Entity):
         self.reglog = datalog.crelog('REGLOG', None, regheader)
         self.loslog = datalog.crelog('LOSLOG', None, losheader)
         
-    @timed_function(name='reglog', dt=30)
+    @timed_function(name='reglog', dt=5)
     def thereglog(self):
         bs.traf.M22Logger.reglog.log(*bs.traf.id)
         bs.traf.M22Logger.reglog.log(*bs.traf.alt/ft)
