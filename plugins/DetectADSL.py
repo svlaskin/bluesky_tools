@@ -319,7 +319,7 @@ class DetectADSL(ConflictDetection):
 
         # Horizontal conflict ------------------------------------------------------
         # qdrlst is for [i,j] qdr from i to j, from perception of ADSB and own coordinates
-        qdr, dist = geo.kwikqdrdist_matrix(np.asmatrix(ownship.lat), np.asmatrix(ownship.lon),
+        qdr, dist = geo.kwikqdrdist_matrix(np.asmatrix(ownship.adsb.lat), np.asmatrix(ownship.adsb.lon),
                                     np.asmatrix(intruder.adsb.lat), np.asmatrix(intruder.adsb.lon))
 
         # Convert back to array to allow element-wise array multiplications later on

@@ -64,8 +64,10 @@ def write_to_batch(text,fname):
 
 def write_lines_to_scen(heading,speed):
     # Basic setup for sim
+    write_line(text="00:00:00.00> NOISE ON", hdg=heading, spd=speed) # load adsl plugin
     write_line(text="00:00:00.00> asas on", hdg=heading, spd=speed)
     write_line(text="00:00:00.00> plugin load adsl", hdg=heading, spd=speed) # load adsl plugin
+    write_line(text="00:00:00.00> IMPL ADSB ADSL", hdg=heading, spd=speed) # load adsl plugin 
     write_line(text="00:00:00.00> plugin load DetectADSL", hdg=heading, spd=speed) # load detection
     write_line(text="00:00:00.00> asas detectADSL", hdg=heading, spd=speed) # detection -> set correct
     write_line(text="00:00:00.00> reso MVP", hdg=heading, spd=speed) # MVP on
@@ -78,16 +80,19 @@ def write_lines_to_scen(heading,speed):
     write_line(text=f"00:00:00.00> startlogs", hdg=heading, spd=speed) # start logs
 
 
+    ownship_id = 'D1'
+    intruder_id = 'D2'
+
     # Spawn ownship, always same position. ID D1 for ownship.
-    text = f"{bstime(0)}>CRE D1 M600 {ownship_spawnloc[0]} {ownship_spawnloc[1]} 0 100 {own_spd}" # ownship parameters are not varied
+    text = f"{bstime(0)}>CRE {ownship_id} M600 {ownship_spawnloc[0]} {ownship_spawnloc[1]} 0 100 {own_spd}" # ownship parameters are not varied
     write_line(text=text, hdg=heading, spd=speed) # hdg and speed only used for filename purposes here
 
-    # Spawn Intruder: need rel. heading and speed. ID is D2.
-    ilat, ilon = [50, 4] # determine needed lat lon -> rep with function
+    # Spawn Intruder: need rel. heading and speed. ID is D2. Use CRECONFS function
+    dcpa = 0
+    dH = 0
+    tlosv = 0
 
-    intruder_spawnloc = qdrpos(ownship_spawnloc[0],ownship_spawnloc[1],heading+180,dist=radius/nm)
-
-    text =  f"{bstime(0)}>CRE D2 M600 {intruder_spawnloc[0]} {intruder_spawnloc[1]} {heading} 100 {speed}"
+    text =  f"{bstime(0)}>CRECONFS {intruder_id} M600 {ownship_id} {heading} {dcpa} {dtlook*1.1} {dH} {tlosv} {speed}"
     write_line(text=text, hdg=heading, spd=speed) # idem
 
     return 

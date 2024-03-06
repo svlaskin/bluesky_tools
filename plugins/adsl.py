@@ -55,10 +55,10 @@ class ADSL(ADSB):
             self.ac_stat = np.array([])
 
         self.set_nav_noise(True)
-        self.set_comm_parameter(False, False)
-        self.update_prob = 1.0
         
         self.comm_noise = True
+        self.update_prob = 0.2
+        
         self.comm_std_dev = 5
 
         self.time_elapsed_total = []
@@ -69,8 +69,8 @@ class ADSL(ADSB):
 
     def set_nav_noise(self, cond):
         self.nav_noise = cond
-        self.hpos_noise_m = 1.5 # in meter, one standard deviation
-        self.gs_noise_ms = 0.0 # in m/s, one standard deviation
+        self.hpos_noise_m = 15.0 # in meter, one standard deviation
+        self.gs_noise_ms = 0 # in m/s, one standard deviation
 
     def set_comm_parameter(self, cond_trunc, cond_reso):
         self.comm_trunc = cond_trunc
@@ -92,14 +92,23 @@ class ADSL(ADSB):
         self.ac_cat[-n:] = self.is_drone(traf.type[-n])
         self.ac_stat[-n:] = random.choices([0, 1], weights=(90, 10), k=1)
 
+    # @core.timed_function(name="update_adsl", dt=1.0)
     def update(self):
 
         # up = np.where(self.lastupdate + self.trunctime < sim.simt)
 
         if(self.comm_noise):
             time_elapsed = sim.simt - self.lastupdate
+
             update_prob = self.update_prob
-            up = np.where(np.random.random(size = traf.ntraf) < update_prob)
+
+            time_cond = time_elapsed >= 1.0
+            update_prob_cond = np.random.random(size = traf.ntraf) <= update_prob
+            
+            up = np.where(time_cond & update_prob_cond)
+
+            stack.stack("ECHO time_elapsed: {}".format(time_elapsed))
+            # stack.stack('ECHO UP: {}'.format(up))
         else:
             up = np.array([True] * traf.ntraf)
 
@@ -107,8 +116,8 @@ class ADSL(ADSB):
         
         if self.nav_noise:
             delta_lat, delta_lon = self.get_lat_lon_noise(self.hpos_noise_m, self.lat, self.lon, up)
-            self.lat[up] += delta_lat
-            self.lon[up] += delta_lon
+            self.lat[up] = traf.lat[up] + delta_lat
+            self.lon[up] = traf.lon[up] + delta_lon
 
             self.gs[up] = traf.gs[up] + np.random.normal(0, self.gs_noise_ms, nup)
         else:
@@ -318,7 +327,8 @@ class ADSL(ADSB):
 
     @core.timed_function(name="print_param_adsl", dt=0.5)
     def print_param_adsl(self):
-        stack.stack('ECHO hpos_noise: {}, update_prob: {}'.format(self.hpos_noise_m, self.update_prob))
+        # stack.stack('ECHO hpos_noise: {}, update_prob: {}'.format(self.hpos_noise_m, self.update_prob))
+        stack.stack('ECHO traf_lat: {}, adsb_lat: {}'.format(traf.lat, self.lat))
         return
 
     @stack.command(name='ADSL_HPOS_NOISE')

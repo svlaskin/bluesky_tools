@@ -4,6 +4,8 @@ cache
 scenario/ic.scn
 bluesky/resources/grib
 bluesky/resources/netcdf
+bluesky/ScenarioGenerator/
+scenario
 
 # Potentially locally-copied BADA installation
 bluesky/resources/performance/BADA/*
