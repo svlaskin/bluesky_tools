@@ -47,9 +47,9 @@ class ADSL(ADSB):
             self.tas        = np.array([])
             self.gs         = np.array([])
             self.vs         = np.array([])
-            self.delta_lat  = np.array([])
-            self.delta_lon  = np.array([])
-            self.delta_gs   = np.array([])
+            self.noise_lat  = np.array([])
+            self.noise_lon  = np.array([])
+            self.noise_gs   = np.array([])
 
             self.pos_noise_lat = np.array([])
             self.pos_noise_lon = np.array([])
@@ -61,7 +61,7 @@ class ADSL(ADSB):
         
         self.comm_noise = True
         self.update_prob = 0.6
-        
+        self.update_period = 1 #second
         self.comm_std_dev = 5
 
         self.time_elapsed_total = []
@@ -105,27 +105,26 @@ class ADSL(ADSB):
 
             update_prob = self.update_prob
 
-            time_cond = time_elapsed >= 1.0
+            time_cond = time_elapsed >= self.update_period
             update_prob_cond = np.random.random(size = traf.ntraf) <= update_prob
             
             up = np.where(time_cond & update_prob_cond)
 
-            # stack.stack('ECHO UP: {}'.format(up))
         else:
             up = np.array([True] * traf.ntraf)
 
         nup = len(up)
         
         if self.nav_noise:
-            self.delta_lat, self.delta_lon = self.get_lat_lon_noise(self.hpos_noise_m, self.lat, self.lon, traf.ntraf)
+            self.noise_lat, self.noise_lon = self.get_lat_lon_noise(self.hpos_noise_m, self.lat, self.lon, traf.ntraf)
 
-            self.lat[up] = traf.lat[up] + self.delta_lat[up]
-            self.lon[up] = traf.lon[up] + self.delta_lon[up]
+            self.lat[up] = traf.lat[up] + self.noise_lat[up]
+            self.lon[up] = traf.lon[up] + self.noise_lon[up]
 
-            self.delta_gs = np.random.normal(0, self.gs_noise_ms, traf.ntraf)
-            self.gs[up] = traf.gs[up] + self.delta_gs[up]
+            self.noise_gs = np.random.normal(0, self.gs_noise_ms, traf.ntraf)
+            self.gs[up] = traf.gs[up] + self.noise_gs[up]
 
-            # stack.stack("ECHO delta_lat: {}".format(self.delta_lat))
+            # stack.stack("ECHO noise_lat: {}".format(self.noise_lat))
 
         else:
             self.lat[up] = traf.lat[up]
@@ -326,10 +325,10 @@ class ADSL(ADSB):
         angles_rad = np.random.uniform(0, 2*np.pi, size = nb)
         distance = np.random.normal(0, stdev, size = nb) / 1000 #km
         
-        delta_lat = distance * np.sin(angles_rad) / 110.574
-        delta_lon = distance * np.cos(angles_rad) / (111.320*np.cos(np.radians(lat_ref)))
+        noise_lat = distance * np.sin(angles_rad) / 110.574
+        noise_lon = distance * np.cos(angles_rad) / (111.320*np.cos(np.radians(lat_ref)))
         
-        return delta_lat, delta_lon
+        return noise_lat, noise_lon
 
 
     # @core.timed_function(name="print_param_adsl", dt=0.5)

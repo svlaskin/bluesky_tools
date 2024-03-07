@@ -321,9 +321,9 @@ class DetectADSL(ConflictDetection):
         # Horizontal conflict ------------------------------------------------------
         # qdrlst is for [i,j] qdr from i to j, from perception of ADSB and own coordinates
 
-        own_lat_measured = ownship.lat + ownship.adsb.delta_lat
-        own_lon_measured = ownship.lon + ownship.adsb.delta_lon
-        own_gs_measured = ownship.gs + ownship.adsb.delta_gs
+        own_lat_measured = ownship.lat + ownship.adsb.noise_lat
+        own_lon_measured = ownship.lon + ownship.adsb.noise_lon
+        own_gs_measured = ownship.gs + ownship.adsb.noise_gs
 
         qdr, dist = geo.kwikqdrdist_matrix(np.asmatrix(own_lat_measured), np.asmatrix(own_lon_measured),
                                     np.asmatrix(intruder.adsb.lat), np.asmatrix(intruder.adsb.lon))
