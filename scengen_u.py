@@ -125,6 +125,6 @@ filename = f"scenario/ADSL/ADSL_batch.scn"
 for scenario_name in namelist:
     scname = scenario_name.split(".")[0]
     write_to_batch(f"00:00:00.00>SCEN {scname}",filename)
-    write_to_batch(f"00:00:00.00>PCALL {scenario_name}",filename)
+    write_to_batch(f"00:00:00.00>PCALL adsl/{scenario_name}",filename)
     write_to_batch(f"00:00:00.00> ff",filename)
     write_to_batch(f"{hours_max}:03:00.00>HOLD", filename)

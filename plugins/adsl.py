@@ -125,7 +125,7 @@ class ADSL(ADSB):
             self.delta_gs = np.random.normal(0, self.gs_noise_ms, traf.ntraf)
             self.gs[up] = traf.gs[up] + self.delta_gs[up]
 
-            stack.stack("ECHO delta_lat: {}".format(self.delta_lat))
+            # stack.stack("ECHO delta_lat: {}".format(self.delta_lat))
 
         else:
             self.lat[up] = traf.lat[up]
@@ -332,11 +332,11 @@ class ADSL(ADSB):
         return delta_lat, delta_lon
 
 
-    @core.timed_function(name="print_param_adsl", dt=0.5)
-    def print_param_adsl(self):
-        # stack.stack('ECHO hpos_noise: {}, update_prob: {}'.format(self.hpos_noise_m, self.update_prob))
-        stack.stack('ECHO traf_lat: {}, adsb_lat: {}'.format(traf.lat, self.lat))
-        return
+    # @core.timed_function(name="print_param_adsl", dt=0.5)
+    # def print_param_adsl(self):
+    #     # stack.stack('ECHO hpos_noise: {}, update_prob: {}'.format(self.hpos_noise_m, self.update_prob))
+    #     stack.stack('ECHO traf_lat: {}, adsb_lat: {}'.format(traf.lat, self.lat))
+    #     return
 
     @stack.command(name='ADSL_HPOS_NOISE')
     def set_adsl_hpos_noise(self, hpos_noise: float = 1.5):

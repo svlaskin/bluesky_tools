@@ -112,7 +112,7 @@ class TrafficHandler(Entity):
         self.distancealt += bs.sim.simdt * abs(bs.traf.vs)
         
         # Now let's do the CONF and LOS logs
-        confpairs_new = list(set(bs.traf.cd.confpairs) - self.prevconfpairs)
+        confpairs_new = list(set(bs.traf.cd.confpairs_groundtruth) - self.prevconfpairs)
         if confpairs_new:
             done_pairs = []
             for pair in set(confpairs_new):
@@ -129,16 +129,16 @@ class TrafficHandler(Entity):
                                     bs.traf.lat[idx1], bs.traf.lon[idx1],bs.traf.alt[idx1],
                                     bs.traf.lat[idx2], bs.traf.lon[idx2],bs.traf.alt[idx2])
                 
-        self.prevconfpairs = set(bs.traf.cd.confpairs)
+        self.prevconfpairs = set(bs.traf.cd.confpairs_groundtruth)
         
         # Losses of separation as well
         # We want to track the LOS, and log the minimum distance and altitude between these two aircraft.
         # This gives us the lospairs that were here previously but aren't anymore
-        lospairs_out = list(self.prevlospairs - set(bs.traf.cd.lospairs))
+        lospairs_out = list(self.prevlospairs - set(bs.traf.cd.lospairs_groundtruth))
         
         # Attempt to calculate current distance for all current lospairs, and store it in the dictionary
         # if entry doesn't exist yet or if calculated distance is smaller.
-        for pair in bs.traf.cd.lospairs:
+        for pair in bs.traf.cd.lospairs_groundtruth:
             # Check if the aircraft still exist
             if (pair[0] in bs.traf.id) and (pair[1] in bs.traf.id):
                 idx1 = bs.traf.id.index(pair[0])
@@ -146,7 +146,7 @@ class TrafficHandler(Entity):
                 # Calculate current distance between them [m]
                 losdistance = kwikdist(bs.traf.lat[idx1], bs.traf.lon[idx1], bs.traf.lat[idx2], bs.traf.lon[idx2])*nm
                 # To avoid repeats, the dictionary entry is DxDy, where x<y. So D32 and D564 would be D32D564
-                dictkey = pair[0]+pair[1] if int(pair[0][3:]) < int(pair[1][3:]) else pair[1]+pair[0]
+                dictkey = pair[0]+pair[1] if int(pair[0][1:]) < int(pair[1][1:]) else pair[1]+pair[0]
                 if dictkey not in self.losmindist:
                     # Set the entry
                     self.losmindist[dictkey] = [losdistance, 
@@ -168,7 +168,7 @@ class TrafficHandler(Entity):
             done_pairs = []
             for pair in set(lospairs_out):
                 # Get their dictkey
-                dictkey = pair[0]+pair[1] if int(pair[0][3:]) < int(pair[1][3:]) else pair[1]+pair[0]
+                dictkey = pair[0]+pair[1] if int(pair[0][1:]) < int(pair[1][1:]) else pair[1]+pair[0]
                 # Is this pair in the dictionary?
                 if dictkey not in self.losmindist:
                     # Pair was already logged, continue
@@ -183,7 +183,7 @@ class TrafficHandler(Entity):
                                 losdata[0])
                 
         
-        self.prevlospairs = set(bs.traf.cd.lospairs)
+        self.prevlospairs = set(bs.traf.cd.lospairs_groundtruth)
             
     @stack.command
     def deleteall(self):

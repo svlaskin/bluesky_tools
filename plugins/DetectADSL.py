@@ -43,9 +43,10 @@ class DetectADSL(ConflictDetection):
         #-------Variables without ADSL effect
         # Conflicts and LoS detected in the current timestep (used for resolving)
         self.confpairs = list()
+        self.confpairs_groundtruth = list()
         self.lospairs = list()
+        self.lospairs_groundtruth = list()
         self.lospairs_real = list()
-
         self.qdr = np.array([])
         self.dist = np.array([])
         self.dcpa = np.array([])
@@ -158,14 +159,14 @@ class DetectADSL(ConflictDetection):
         self.lospairs_unique = lospairs_unique
 
         # get the real metrics, instead of the measured one
-        confpairs, lospairs, inconf, tcpamax, qdr, \
+        self.confpairs_groundtruth, self.lospairs_groundtruth, inconf, tcpamax, qdr, \
             dist, dcpa, tcpa, tLOS, swlos, cpa_all, dist_all = \
                 self.detect_ideal(ownship, intruder, self.rpz, self.hpz, self.dtlookahead)
         
         # confpairs has conflicts observed from both sides (a, b) and (b, a)
         # confpairs_unique keeps only one of these
-        confpairs_unique_real = {frozenset(pair) for pair in confpairs}
-        lospairs_unique_real = {frozenset(pair) for pair in lospairs}
+        confpairs_unique_real = {frozenset(pair) for pair in self.confpairs_groundtruth}
+        lospairs_unique_real = {frozenset(pair) for pair in self.lospairs_groundtruth}
 
         self.confpairs_all_real.extend(confpairs_unique_real - self.confpairs_unique_real)
         self.lospairs_all_real.extend(lospairs_unique_real - self.lospairs_unique_real)
