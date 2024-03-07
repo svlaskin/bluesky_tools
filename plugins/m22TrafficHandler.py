@@ -66,42 +66,42 @@ class TrafficHandler(Entity):
             self.distance3D = np.array([])
             self.distancealt = np.array([])
 
-    @timed_function(dt = 0.5)
-    def delete_aircraft(self):
-        self.update_logging()
-        # Delete aircraft that have LNAV off and have gone past the last waypoint.
-        lnav_on = bs.traf.swlnav
-        still_going_to_dest = np.logical_and(abs(degto180(bs.traf.trk - bs.traf.ap.qdr2wp)) < 10.0, 
-                                       bs.traf.ap.dist2wp > 5)
-        delete_array = np.logical_and.reduce((np.logical_not(lnav_on), 
-                                         bs.traf.actwp.swlastwp,
-                                         np.logical_not(still_going_to_dest)))
+    # @timed_function(dt = 0.5)
+    # def delete_aircraft(self):
+    #     self.update_logging()
+    #     # Delete aircraft that have LNAV off and have gone past the last waypoint.
+    #     lnav_on = bs.traf.swlnav
+    #     still_going_to_dest = np.logical_and(abs(degto180(bs.traf.trk - bs.traf.ap.qdr2wp)) < 10.0, 
+    #                                    bs.traf.ap.dist2wp > 5)
+    #     delete_array = np.logical_and.reduce((np.logical_not(lnav_on), 
+    #                                      bs.traf.actwp.swlastwp,
+    #                                      np.logical_not(still_going_to_dest)))
         
-        if np.any(delete_array):
-            # Get the ACIDs of the aircraft to delete
-            acids_to_delete = np.array(bs.traf.id)[delete_array]
-            for acid in acids_to_delete:
-                # Log the stuff for this aircraft in the flstlog
-                idx = bs.traf.id.index(acid)
-                bs.traf.M22Logger.flst.log(
-                    acid,
-                    bs.traf.m22delay.create_time[idx],
-                    bs.sim.simt - bs.traf.m22delay.create_time[idx],
-                    (self.distance2D[idx]),
-                    (self.distance3D[idx]),
-                    (self.distancealt[idx]),
-                    bs.traf.lat[idx],
-                    bs.traf.lon[idx],
-                    bs.traf.alt[idx]/ft,
-                    bs.traf.tas[idx]/kts,
-                    bs.traf.vs[idx]/fpm,
-                    bs.traf.hdg[idx],
-                    bs.traf.cr.active[idx],
-                    bs.traf.aporasas.alt[idx]/ft,
-                    bs.traf.aporasas.tas[idx]/kts,
-                    bs.traf.aporasas.vs[idx]/fpm,
-                    bs.traf.aporasas.hdg[idx])
-                stack.stack(f'DEL {acid}')
+    #     if np.any(delete_array):
+    #         # Get the ACIDs of the aircraft to delete
+    #         acids_to_delete = np.array(bs.traf.id)[delete_array]
+    #         for acid in acids_to_delete:
+    #             # Log the stuff for this aircraft in the flstlog
+    #             idx = bs.traf.id.index(acid)
+    #             bs.traf.M22Logger.flst.log(
+    #                 acid,
+    #                 bs.traf.m22delay.create_time[idx],
+    #                 bs.sim.simt - bs.traf.m22delay.create_time[idx],
+    #                 (self.distance2D[idx]),
+    #                 (self.distance3D[idx]),
+    #                 (self.distancealt[idx]),
+    #                 bs.traf.lat[idx],
+    #                 bs.traf.lon[idx],
+    #                 bs.traf.alt[idx]/ft,
+    #                 bs.traf.tas[idx]/kts,
+    #                 bs.traf.vs[idx]/fpm,
+    #                 bs.traf.hdg[idx],
+    #                 bs.traf.cr.active[idx],
+    #                 bs.traf.aporasas.alt[idx]/ft,
+    #                 bs.traf.aporasas.tas[idx]/kts,
+    #                 bs.traf.aporasas.vs[idx]/fpm,
+    #                 bs.traf.aporasas.hdg[idx])
+    #             stack.stack(f'DEL {acid}')
                 
             
     def update_logging(self):        

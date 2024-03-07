@@ -319,7 +319,12 @@ class DetectADSL(ConflictDetection):
 
         # Horizontal conflict ------------------------------------------------------
         # qdrlst is for [i,j] qdr from i to j, from perception of ADSB and own coordinates
-        qdr, dist = geo.kwikqdrdist_matrix(np.asmatrix(ownship.adsb.lat), np.asmatrix(ownship.adsb.lon),
+
+        own_lat_measured = ownship.lat + ownship.adsb.delta_lat
+        own_lon_measured = ownship.lon + ownship.adsb.delta_lon
+        own_gs_measured = ownship.gs + ownship.adsb.delta_gs
+
+        qdr, dist = geo.kwikqdrdist_matrix(np.asmatrix(own_lat_measured), np.asmatrix(own_lon_measured),
                                     np.asmatrix(intruder.adsb.lat), np.asmatrix(intruder.adsb.lon))
 
         # Convert back to array to allow element-wise array multiplications later on
@@ -332,10 +337,13 @@ class DetectADSL(ConflictDetection):
         dx = dist * np.sin(qdrrad)  # is pos j rel to i
         dy = dist * np.cos(qdrrad)  # is pos j rel to i
 
+        ## add noise for the ownship
+        
+
         # Ownship track angle and speed
         owntrkrad = np.radians(ownship.trk)
-        ownu = ownship.gs * np.sin(owntrkrad).reshape((1, ownship.ntraf))  # m/s
-        ownv = ownship.gs * np.cos(owntrkrad).reshape((1, ownship.ntraf))  # m/s
+        ownu = own_gs_measured * np.sin(owntrkrad).reshape((1, ownship.ntraf))  # m/s
+        ownv = own_gs_measured * np.cos(owntrkrad).reshape((1, ownship.ntraf))  # m/s
 
         # Intruder track angle and speed
         inttrkrad = np.radians(intruder.adsb.trk)

@@ -74,7 +74,7 @@ def write_lines_to_scen(heading,speed):
     write_line(text="00:00:00.00> plugin load traffichandler", hdg=heading, spd=speed) # handler
     write_line(text="00:00:00.00> plugin load m22logger", hdg=heading, spd=speed) # log
     write_line(text="00:00:00.00> pan 50 4", hdg=heading, spd=speed)
-    write_line(text="00:00:00.00> zoom 20", hdg=heading, spd=speed)
+    write_line(text="00:00:00.00> zoom 25", hdg=heading, spd=speed)
     write_line(text=f"00:00:00.00> rpz {rpz}", hdg=heading, spd=speed) # set rpz
     write_line(text=f"00:00:00.00> dtlook {dtlook}", hdg=heading, spd=speed) # set lookahead
     write_line(text=f"00:00:00.00> startlogs", hdg=heading, spd=speed) # start logs
@@ -89,7 +89,7 @@ def write_lines_to_scen(heading,speed):
     write_line(text=text, hdg=heading, spd=speed) # hdg and speed only used for filename purposes here
 
     # Spawn Intruder: need rel. heading and speed. ID is D2. Use CRECONFS function
-    dcpa = 0
+    dcpa = 25/nm
     dH = 0
     tlosv = 0
 
