@@ -118,7 +118,7 @@ if os.path.isfile(ds_store_file_location):
 namelist = os.listdir(f"scenario/ADSL")
 
 # determine stoppage: for now 1 hour
-hours_max = 1
+hours_max = 0
 
 filename = f"scenario/ADSL/ADSL_batch.scn"
 
@@ -127,4 +127,4 @@ for scenario_name in namelist:
     write_to_batch(f"00:00:00.00>SCEN {scname}",filename)
     write_to_batch(f"00:00:00.00>PCALL {scenario_name}",filename)
     write_to_batch(f"00:00:00.00> ff",filename)
-    write_to_batch(f"{hours_max}:00:00.00>HOLD", filename)
+    write_to_batch(f"{hours_max}:03:00.00>HOLD", filename)
