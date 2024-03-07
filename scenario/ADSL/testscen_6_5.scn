@@ -1,0 +1,16 @@
+00:00:00.00> NOISE ON
+00:00:00.00> asas on
+00:00:00.00> plugin load adsl
+00:00:00.00> IMPL ADSB ADSL
+00:00:00.00> plugin load DetectADSL
+00:00:00.00> asas detectADSL
+00:00:00.00> reso MVP
+00:00:00.00> plugin load traffichandler
+00:00:00.00> plugin load m22logger
+00:00:00.00> pan 50 4
+00:00:00.00> zoom 25
+00:00:00.00> rpz 0.026997840172786176
+00:00:00.00> dtlook 15
+00:00:00.00> startlogs
+0:00:00>CRE D1 M600 50 4 0 100 20
+0:00:00>CRECONFS D2 M600 D1 6 0.013498920086393088 16.5 0 0 5
