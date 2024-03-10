@@ -25,10 +25,11 @@ cruisealt_in = 50/ft
 """
 Settings
 """
-ownship_spawnloc = [50, 4] # lat, lon [deg]
+initial_ownship_spawnloc = [50, 4] # lat, lon [deg]
 radius = 2000 # radius of conflict circle [m]
 theta_res = 1 # angular resolution [deg]
-rpz = 50/nm # [m], converted to nm
+rpz_m = 50
+rpz = rpz_m/nm # [m], converted to nm
 dtlook = 15 #[s]
 own_spd = 20 # [kts]
 # downlat, downlon, uplat, uplon = '52.2781742', '4.7287563', '52.4310638', '5.0791622'
@@ -52,8 +53,8 @@ def write_pkl(filename, dataframe):
 def bstime(time_start):
     return str(datetime.timedelta(seconds=float(time_start)))
 
-def write_line(text,hdg,spd):
-    name = f"testscen_{hdg}_{spd}"
+def write_line(text,file_id):
+    name = f"testscen_{file_id}"
     with open(f'scenario/ADSL/{name}.scn', 'a') as fd:
         fd.write(text + '\n')
 
@@ -62,39 +63,52 @@ def write_to_batch(text,fname):
             fd.write(text + '\n')
     return
 
-def write_lines_to_scen(heading,speed):
+def write_lines_to_scen(df, file_id):
     # Basic setup for sim
-    write_line(text="00:00:00.00> NOISE ON", hdg=heading, spd=speed) # load adsl plugin
-    write_line(text="00:00:00.00> asas on", hdg=heading, spd=speed)
-    write_line(text="00:00:00.00> plugin load adsl", hdg=heading, spd=speed) # load adsl plugin
-    write_line(text="00:00:00.00> IMPL ADSB ADSL", hdg=heading, spd=speed) # load adsl plugin 
-    write_line(text="00:00:00.00> plugin load DetectADSL", hdg=heading, spd=speed) # load detection
-    write_line(text="00:00:00.00> asas detectADSL", hdg=heading, spd=speed) # detection -> set correct
-    write_line(text="00:00:00.00> reso MVP", hdg=heading, spd=speed) # MVP on
-    write_line(text="00:00:00.00> plugin load traffichandler", hdg=heading, spd=speed) # handler
-    write_line(text="00:00:00.00> plugin load m22logger", hdg=heading, spd=speed) # log
-    write_line(text="00:00:00.00> pan 50 4", hdg=heading, spd=speed)
-    write_line(text="00:00:00.00> zoom 25", hdg=heading, spd=speed)
-    write_line(text=f"00:00:00.00> rpz {rpz}", hdg=heading, spd=speed) # set rpz
-    write_line(text=f"00:00:00.00> dtlook {dtlook}", hdg=heading, spd=speed) # set lookahead
-    write_line(text=f"00:00:00.00> startlogs", hdg=heading, spd=speed) # start logs
+    write_line("00:00:00.00> NOISE ON", file_id) # load adsl plugin
+    write_line("00:00:00.00> asas on", file_id)
+    write_line("00:00:00.00> plugin load adsl", file_id) # load adsl plugin
+    write_line("00:00:00.00> IMPL ADSB ADSL", file_id) # load adsl plugin 
+    write_line("00:00:00.00> plugin load DetectADSL", file_id) # load detection
+    write_line("00:00:00.00> plugin load adsl_logger", file_id) # load adsl plugin
+    write_line("00:00:00.00> asas detectADSL", file_id) # detection -> set correct
+    write_line("00:00:00.00> reso MVP", file_id) # MVP on
+    # write_line("00:00:00.00> plugin load traffichandler", file_id) # handler
+    # write_line("00:00:00.00> plugin load m22logger", file_id) # log
+    write_line("00:00:00.00> pan 50 4", file_id)
+    write_line("00:00:00.00> zoom 25", file_id)
+    write_line(f"00:00:00.00> rpz {rpz}", file_id) # set rpz
+    write_line(f"00:00:00.00> dtlook {dtlook}", file_id) # set lookahead
+    # write_line(f"00:00:00.00> startlogs", file_id) # start logs
 
 
+    # Spawn Intruder
+    # dcpa_m = np.random.randint(0, 50) # 50 m is the rpz
+    dcpa_m = 25
+    dcpa = dcpa_m / nm
+    dH = 0
+    tlosv = 0
 
     ownship_id = 'D1'
     intruder_id = 'D2'
 
-    # Spawn ownship, always same position. ID D1 for ownship.
-    text = f"{bstime(0)}>CRE {ownship_id} M600 {ownship_spawnloc[0]} {ownship_spawnloc[1]} 0 100 {own_spd}" # ownship parameters are not varied
-    write_line(text=text, hdg=heading, spd=speed) # hdg and speed only used for filename purposes here
+    for idx, row in df.iterrows():
+        spawn_col_index, spawn_row_index = divmod(idx, 12)
 
-    # Spawn Intruder: need rel. heading and speed. ID is D2. Use CRECONFS function
-    dcpa = 25/nm
-    dH = 0
-    tlosv = 0
+        heading = row['heading']
+        speed = row['speed']
+        ownship_id = row['ownship']
+        intruder_id = row['intruder']
 
-    text =  f"{bstime(0)}>CRECONFS {intruder_id} M600 {ownship_id} {heading} {dcpa} {dtlook*1.1} {dH} {tlosv} {speed}"
-    write_line(text=text, hdg=heading, spd=speed) # idem
+        ownship_lat = initial_ownship_spawnloc[0] + (spawn_row_index * 0.01)
+        ownship_lon = initial_ownship_spawnloc[1] + (spawn_col_index * 0.01)
+
+        # Spawn ownship, always same position. ID D1 for ownship.
+        text = f"{bstime(0)}>CRE {ownship_id} M600 {ownship_lat} {ownship_lon} 0 100 {own_spd}" # ownship parameters are not varied
+        write_line(text, file_id) # hdg and speed only used for filename purposes here
+
+        text =  f"{bstime(0)}>CRECONFS {intruder_id} M600 {ownship_id} {heading} {dcpa} {dtlook*1.1} {dH} {tlosv} {speed}"
+        write_line(text, file_id) # idem
 
     return 
 
@@ -106,10 +120,35 @@ Scenario Generator loop
 rel_headings = np.arange(6,8,1) # 1 degree increments of rel. headings
 v_intruder =  [5, 15, 25, 35] # [kts]
 
-# one speed-heading combo is a unique file
-for hdg in rel_headings:
-    for v in v_intruder:
-        name = write_lines_to_scen(hdg,v)
+from itertools import product
+
+## create df
+
+heading = np.arange(0, 360, 1)
+gs_intruder = np.arange(5, 45, 10)
+
+combinations = list(product(heading, gs_intruder))
+
+ownship_list = []
+intruder_list = []
+
+for i in range(len(combinations)):
+    ownship_list.append(f"DRO{i:04d}")
+    intruder_list.append(f"DRI{i:04d}")
+
+df = pd.DataFrame(combinations, columns=['heading', 'speed'])
+
+df['ownship'] = ownship_list
+df['intruder'] = intruder_list
+
+nb_ac_per_scen = 12*12
+partition = int(len(df)/(nb_ac_per_scen))
+
+for i in range(partition):
+    file_id = f"{i}_{1}"
+    df_here = df.iloc[(144*i) : (144*i)+144]
+
+    name = write_lines_to_scen(df_here, file_id)
 
 # remove DS_store and find all scen files to put in batch
 ds_store_file_location = f"scenario/ADSL/.DS_store"
@@ -122,9 +161,13 @@ hours_max = 0
 
 filename = f"scenario/ADSL/ADSL_batch.scn"
 
+counter = 0
 for scenario_name in namelist:
+    counter += 1
+    
     scname = scenario_name.split(".")[0]
     write_to_batch(f"00:00:00.00>SCEN {scname}",filename)
     write_to_batch(f"00:00:00.00>PCALL adsl/{scenario_name}",filename)
     write_to_batch(f"00:00:00.00> ff",filename)
-    write_to_batch(f"{hours_max}:03:00.00>HOLD", filename)
+    write_to_batch(f"00:00:00.00> SCHEDULE 00:01:00.00 HOLD",filename)
+    write_to_batch(f"00:00:00.00> SCHEDULE 00:01:00.00 LOGCPA {scname} {rpz_m}",filename)

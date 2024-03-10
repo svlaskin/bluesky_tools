@@ -131,9 +131,9 @@ class ADSL(ADSB):
             self.lon[up] = traf.lon[up]
             self.alt[up] = traf.alt[up]
 
-        if(self.comm_reso):
-            self.gs = self.encode_decode_gs(self.gs[up])
-            self.trk = self.encode_decode_trk(traf.trk[up])
+        # if(self.comm_reso):
+        #     self.gs[up] = self.encode_decode_gs(self.gs[up])
+        #     self.trk[up] = self.encode_decode_trk(traf.trk[up])
 
         self.tas[up] = traf.tas[up]
         self.vs[up]  = traf.vs[up]
