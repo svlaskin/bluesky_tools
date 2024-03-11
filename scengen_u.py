@@ -83,14 +83,10 @@ def write_lines_to_scen(df, file_id):
 
 
     # Spawn Intruder
-    # dcpa_m = np.random.randint(0, 50) # 50 m is the rpz
-    dcpa_m = 25
+    dcpa_m = np.random.randint(0, 50) # 50 m is the rpz
     dcpa = dcpa_m / nm
     dH = 0
     tlosv = 0
-
-    ownship_id = 'D1'
-    intruder_id = 'D2'
 
     for idx, row in df.iterrows():
         spawn_col_index, spawn_row_index = divmod(idx, 12)
@@ -116,9 +112,6 @@ def write_lines_to_scen(df, file_id):
 """
 Scenario Generator loop
 """
-
-rel_headings = np.arange(6,8,1) # 1 degree increments of rel. headings
-v_intruder =  [5, 15, 25, 35] # [kts]
 
 from itertools import product
 
