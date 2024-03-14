@@ -62,7 +62,7 @@ class ADSL(ADSB):
         self.comm_noise = True
         self.update_prob = 0.6
         self.update_period = 1 #second
-        self.comm_std_dev = 5
+        self.comm_std_dev = 0
 
         self.time_elapsed_total = []
 
@@ -84,7 +84,8 @@ class ADSL(ADSB):
         super().create(n)
         
         # self.lastupdate[-n:] = -self.trunctime * np.random.rand(n)
-        self.lastupdate[-n:] = np.random.normal(0, self.comm_std_dev) # add sim.simt here because ac can be spawned at any sim.simt time
+        # self.lastupdate[-n:] = np.random.normal(0, self.comm_std_dev) # add sim.simt here because ac can be spawned at any sim.simt time
+        self.lastupdate[-n:] = 0
         self.lat[-n:] = traf.lat[-n:]
         self.lon[-n:] = traf.lon[-n:]
         self.alt[-n:] = traf.alt[-n:]
@@ -95,17 +96,16 @@ class ADSL(ADSB):
         self.ac_cat[-n:] = self.is_drone(traf.type[-n])
         self.ac_stat[-n:] = random.choices([0, 1], weights=(90, 10), k=1)
 
-    # @core.timed_function(name="update_adsl", dt=1.0)
     def update(self):
 
         # up = np.where(self.lastupdate + self.trunctime < sim.simt)
 
         if(self.comm_noise):
             time_elapsed = sim.simt - self.lastupdate
-
+            
             update_prob = self.update_prob
 
-            time_cond = time_elapsed >= self.update_period
+            time_cond = (time_elapsed % self.update_period == 0)
             update_prob_cond = np.random.random(size = traf.ntraf) <= update_prob
             
             up = np.where(time_cond & update_prob_cond)
