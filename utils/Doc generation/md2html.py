@@ -6,11 +6,11 @@ import re
 source_path = Path('bluesky.wiki/')
 
 # Regular expression to match Github internal references like [[name|link]]
-re_gitlink2 = re.compile('\[\[([^|]+)\|([^]]+)\]\]')
+re_gitlink2 = re.compile(r'\[\[([^|]+)\|([^]]+)\]\]')
 # Regular expression to match Github internal references like [[name]]
-re_gitlink1 = re.compile('\[\[([^]|]+)\]\]')
+re_gitlink1 = re.compile(r'\[\[([^]|]+)\]\]')
 # Replace whitespace in file names to dashes
-re_ws       = re.compile('\s+')
+re_ws       = re.compile(r'\s+')
 
 
 def wsrepl(matchobj):
@@ -25,11 +25,12 @@ for file in source_path.glob('*.md'):
         lines   = f.read()
         lines   = re_gitlink1.sub(wsrepl, lines)
         lines   = re_gitlink2.sub(wsrepl, lines)
-
-    fileout = Path(file).with_suffix(".html").name
+    file = Path(file)
+    fileout = file.with_suffix(".html").name
     print(file, '->', fileout)
-    p = Popen('pandoc -o html/' + fileout + ' --template template.html --css doc.css -f markdown_github', stdin=PIPE, shell=True)
-    p.communicate(lines)
+    title = file.stem.replace('-', ' ')
+    p = Popen('pandoc -o html/' + fileout + f' --template template.html  --metadata title="{title}" --css doc.css -f gfm', stdin=PIPE, shell=True)
+    p.communicate(lines.encode('charmap', errors='ignore'))
 
 
 

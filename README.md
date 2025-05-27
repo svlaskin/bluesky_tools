@@ -1,19 +1,17 @@
-# 10 years of BlueSky!
-This year marks BlueSky's tenth anniversary, which we are celebrating with a two-day [workshop](https://forms.office.com/e/mXamnSYba5) on November 8-9.
-![workshop programme](https://github.com/TUDelft-CNS-ATM/bluesky/blob/a20cf4497d6fc57d859970891026db7ba3574807/docs/workshop_programme.png)
-
 # BlueSky - The Open Air Traffic Simulator
 
 [![Open in Visual Studio Code](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://open.vscode.dev/TUDelft-CNS-ATM/bluesky)
 [![GitHub release](https://img.shields.io/github/release/TUDelft-CNS-ATM/bluesky.svg)](https://GitHub.com/TUDelft-CNS-ATM/bluesky/releases/)
 ![GitHub all releases](https://img.shields.io/github/downloads/TUDelft-CNS-ATM/bluesky/total?style=social)
+[![Discord](https://img.shields.io/discord/1359446056877690970?style=flat&logo=discord&logoColor=green&logoSize=auto&label=BlueSky%20discussion)](https://discord.gg/wkBKgXCHYN)
+
 
 [![PyPI version shields.io](https://img.shields.io/pypi/v/bluesky-simulator.svg)](https://pypi.python.org/pypi/bluesky-simulator/)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/bluesky-simulator?style=plastic)
 [![PyPI license](https://img.shields.io/pypi/l/bluesky-simulator?style=plastic)](https://pypi.python.org/pypi/bluesky-simulator/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/bluesky-simulator?style=plastic)](https://pypi.python.org/pypi/bluesky-simulator/)
 
-BlueSky is meant as a tool to perform research on Air Traffic Management and Air Traffic Flows, and is distributed under the GNU General Public License v3.
+BlueSky is meant as a tool to perform research on Air Traffic Management and Air Traffic Flows, and is distributed under the MIT license.
 
 The goal of BlueSky is to provide everybody who wants to visualize, analyze or simulate air
 traffic with a tool to do so without any restrictions, licenses or limitations. It can be copied,
@@ -47,6 +45,9 @@ autopilot, conflict detection and resolution and airborne separation assurance s
 - Traffic is controlled via user inputs in a console window or by playing scenario files (.SCN)
 containing the same commands with a time stamp before the command ("HH:MM:SS.hh>")
 - Mouse clicks in traffic window are use in console for lat/lon/heading and position inputs
+
+## Questions or suggestions?
+Visit us on [Discord](https://discord.gg/wkBKgXCHYN), open a topic on the GitHub discussion board, or open an issue.
 
 ## Contributions
 BlueSky can be considered 'perpetual beta'. We would like to encourage anyone with a strong interest in

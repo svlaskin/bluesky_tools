@@ -1,10 +1,10 @@
 ''' BlueSky: The open-source ATM simulator.'''
-from bluesky import settings
-from bluesky.core import Signal
+import importlib
+# from bluesky import settings, stack
 from bluesky.pathfinder import resource
-from bluesky import stack
-from bluesky import tools
 
+
+__all__ = ['settings', 'stack', 'tools', 'cmdargs']
 
 # Constants
 BS_OK = 0
@@ -20,6 +20,7 @@ mode = ''
 gui = ''
 
 # Main singleton objects in BlueSky
+ref = None
 net = None
 traf = None
 navdb = None
@@ -29,7 +30,7 @@ server = None
 
 
 def init(mode='sim', configfile=None, scenfile=None, discoverable=False,
-         gui=None, detached=False, workdir=None, **kwargs):
+         gui=None, detached=False, workdir=None, group_id=None, **kwargs):
     ''' Initialize bluesky modules.
 
         Arguments:
@@ -41,6 +42,8 @@ def init(mode='sim', configfile=None, scenfile=None, discoverable=False,
         - gui: Gui type (only when mode is client or server) [qtgl/pygame/console]
         - detached: Run with or without networking (only when mode is sim) [True/False]
         - workdir: Pass a custom working directory (instead of cwd or ~/bluesky)
+        - group_id: Explicitly set (part of) the connection identifier string.
+                    Server does this when spawning a node
     '''
 
     # Argument checking
@@ -61,26 +64,34 @@ def init(mode='sim', configfile=None, scenfile=None, discoverable=False,
     globals()['mode'] = mode
     globals()['gui'] = gui
 
+    global server, traf, sim, scr, net, navdb
+
     # Initialise resource localisation, and set custom working directory if present
     from bluesky import pathfinder
     pathfinder.init(workdir)
 
     # Initialize global settings, possibly loading a custom config file
+    from bluesky import settings
     settings.init(configfile)
 
+    from bluesky import stack, tools
+
     # Initialise tools
+    from bluesky import tools
     tools.init()
+
+    # Initialise reference data object
+    from bluesky import refdata
+    globals()['ref'] = refdata.RefData()
 
     # Load navdatabase in all versions of BlueSky
     # Only the headless server doesn't need this
     if mode == "sim" or gui is not None:
         from bluesky.navdatabase import Navdatabase
-        global navdb
         navdb = Navdatabase()
 
     # If mode is server-gui or server-headless start the networking server
     if mode == 'server':
-        global server
         from bluesky.network.server import Server
         server = Server(discoverable, configfile, scenfile)
 
@@ -89,7 +100,7 @@ def init(mode='sim', configfile=None, scenfile=None, discoverable=False,
         from bluesky.traffic import Traffic
         from bluesky.simulation import Simulation
         if gui == 'pygame':
-            from bluesky.ui.pygame import Screen
+            from bluesky.ui.pygame.screen import Screen
             from bluesky.network.detached import Node
         else:
             from bluesky.simulation import ScreenIO as Screen
@@ -100,19 +111,32 @@ def init(mode='sim', configfile=None, scenfile=None, discoverable=False,
 
         from bluesky.core import varexplorer
 
-        # Initialize singletons
-        global traf, sim, scr, net
+        # Initialise singletons
         traf = Traffic()
         sim = Simulation()
         scr = Screen()
-        net = Node(settings.simevent_port,
-                   settings.simstream_port)
+        net = Node(group_id)
 
         # Initialize remaining modules
         varexplorer.init()
-        if scenfile:
-            stack.stack(f'IC {scenfile}')
+    elif mode == 'client' or (mode == 'server' and gui is not None):
+        # For clients we initialise the traffic object as a network
+        # proxy. When BlueSky is run as a full application, server
+        # and client share one process.
+        from bluesky.core.trafficproxy import TrafficProxy
+
+        # Initialise singletons
+        traf = TrafficProxy()
 
     from bluesky.core import plugin
     plugin.init(mode)
+    from bluesky import stack
     stack.init(mode)
+    if scenfile and mode == 'sim':
+        stack.stack(f'IC {scenfile}')
+
+
+def __getattr__(name):
+    if name in __all__:
+        return importlib.import_module(f'.{name}', __name__)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

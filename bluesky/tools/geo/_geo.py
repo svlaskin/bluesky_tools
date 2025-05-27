@@ -11,6 +11,8 @@ nm  = 1852.  # m       1 nautical mile
 
 # Read data for declination switch
 decl_read = False
+decl_lat_lon = np.array([])
+
 
 def rwgs84(latd):
     """ Calculate the earths radius with WGS'84 geoid definition
@@ -431,7 +433,7 @@ def magdec(latd, lond):
     of the actual data. Axes were regularly spaced at one degree. The direct
     manual linear interpolation also 6 x times faster.
     """
-    global decl_read, decl_lat_lon
+    global decl_read
     if not decl_read:
         initdecl_data()
         decl_read = True

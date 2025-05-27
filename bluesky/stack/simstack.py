@@ -1,7 +1,7 @@
 ''' Main simulation-side stack functions. '''
-import math
 from pathlib import Path
 import traceback
+
 import bluesky as bs
 from bluesky.stack.stackbase import Stack, stack, checkscen, forward
 from bluesky.stack.cmdparser import Command, command
@@ -27,10 +27,6 @@ def init():
     # Initialise base commands
     initbasecmds()
 
-    # Display Help text on start of program
-    stack("ECHO BlueSky Console Window: Enter HELP or ? for info.\n"
-          "Or select IC to Open a scenario file.")
-
     # Pan to initial location
     stack("PAN " + settings.start_location)
     stack("ZOOM 0.4")
@@ -43,18 +39,16 @@ def reset():
 
     # Close recording file and reset scenario recording settings
     recorder.reset()
-    # Reset parser reference values
-    argparser.reset()
 
 
-def process(from_pcall=None):
+def process(ext_cmds=None):
     ''' Sim-side stack processing. '''
-    # First check for commands in scenario file
-    if from_pcall is None:
+    # If no commands are passed, check for commands in scenario file
+    if ext_cmds is None:
         checkscen()
 
     # Process stack of commands
-    for cmdline in Stack.commands(from_pcall):
+    for cmdline in Stack.commands(ext_cmds):
         success = True
         echotext = ''
         echoflags = bs.BS_OK
@@ -89,6 +83,7 @@ def process(from_pcall=None):
                 echoflags = bs.BS_ARGERR
                 header = '' if not argstring else e.args[0] if e.args else 'Argument error.'
                 echotext = f'{header}\nUsage:\n{cmdobj.brieftext()}'
+                traceback.print_exc()
             except Exception as e:
                 echoflags = bs.BS_FUNERR
                 header = '' if not argstring else e.args[0] if e.args else 'Function error.'
@@ -96,20 +91,10 @@ def process(from_pcall=None):
                     'Traceback printed to terminal.'
                 traceback.print_exc()
 
-        # ----------------------------------------------------------------------
-        # ZOOM command (or use ++++  or --  to zoom in or out)
-        # ----------------------------------------------------------------------
-        elif cmdu[0] in ("+", "=", "-"):
-            # = equals + (same key)
-            nplus = cmdu.count("+") + cmdu.count("=")
-            nmin = cmdu.count("-")
-            bs.scr.zoom(math.sqrt(2) ** (nplus - nmin), absolute=False)
-            cmdu = 'ZOOM'
-
         # -------------------------------------------------------------------
         # Command not found
         # -------------------------------------------------------------------
-        elif Stack.sender_rte is None:
+        elif Stack.sender_id is None:
             # Command came from scenario file: assume it's a gui/client command and send it on
             forward()
         else:
@@ -123,15 +108,15 @@ def process(from_pcall=None):
         # Recording of actual validated commands
         if success:
             recorder.savecmd(cmdu, cmdline)
-        elif not Stack.sender_rte:
+        elif not Stack.sender_id:
             echotext = f'{cmdline}\n{echotext}'
 
         # Always return on command
         if echotext:
-            bs.scr.echo(echotext, echoflags)
+            echo(echotext, echoflags)
 
     # Clear the processed commands
-    if from_pcall is None:
+    if ext_cmds is None:
         Stack.clear()
 
 
@@ -149,7 +134,7 @@ def readscn(fname):
         for line in fscen:
             line = line.strip()
             # Skip emtpy lines and comments
-            if len(line) < 12 or line[0] == "#":
+            if len(line) < 10 or line[0] == "#":
                 continue
             line = prevline + line
 
@@ -161,6 +146,8 @@ def readscn(fname):
 
             # Try reading timestamp and command
             try:
+                line = line.split("#")[0].strip()
+
                 icmdline = line.index(">")
                 tstamp = line[:icmdline]
                 ttxt = tstamp.strip().split(":")
@@ -251,6 +238,21 @@ def merge(source, *args, isrelative=True):
         process(callnow)
 
 
+@command(annotations='string')
+def echo(text='', flags=0, to_group=b''):
+        ''' Echo
+
+            Simulation-side implementation of ECHO sends echo message on to client.    
+        '''
+        bs.net.send('ECHO', dict(text=text, flags=flags), to_group=to_group)
+
+
+@command(name='INSEDIT')
+def cmdline(text: 'string'):
+    ''' Insert text op edit line in command window. '''
+    bs.net.send(b'CMDLINE', text)
+
+
 @command(aliases=('LOAD', 'OPEN'))
 def ic(filename : 'string' = ''):
     ''' IC: Load a scenario file (initial condition).
@@ -259,15 +261,15 @@ def ic(filename : 'string' = ''):
         - filename: The filename of the scenario to load. Call IC IC
           to load previous scenario again. '''
 
-    # reset sim always
-    bs.sim.reset()
-
     # Get the filename of new scenario
     if not filename:
         filename = bs.scr.show_file_dialog()
         if not filename:
             # Only PyGame returns a filename from the dialog here
             return
+
+    # reset sim always
+    bs.sim.reset()
 
     # Clean up filename
     filename = Path(filename)
@@ -401,14 +403,14 @@ def makedoc():
                     + f"    {o.brief}\n\n"
                     + "**Arguments:**\n\n"
                 )
-                if not o.parsers:
+                if not o.params:
                     f.write("This command has no arguments.\n\n")
                 else:
                     f.write(
                         "|Name|Type|Optional|Description\n"
                         + "|--------|------|---|---------------------------------------------------\n"
                     )
-                    for arg in o.parsers:
+                    for arg in o.params:
                         f.write(str(arg).replace(':', '|') + f" |{arg.hasdefault()}|\n")
                 f.write("\n[[Back to command reference.|Command Reference]]\n")
 
