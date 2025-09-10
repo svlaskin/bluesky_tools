@@ -9,8 +9,13 @@ def encode_ndarray(o):
                 b'data': o.tobytes()}
     return o
 
+# def decode_ndarray(o):
+#     '''Msgpack decoder for numpy arrays.'''
+#     if o.get(b'numpy'):
+#         return np.fromstring(o[b'data'], dtype=np.dtype(o[b'type'])).reshape(o[b'shape'])
+#     return o
 def decode_ndarray(o):
     '''Msgpack decoder for numpy arrays.'''
-    if o.get(b'numpy'):
-        return np.fromstring(o[b'data'], dtype=np.dtype(o[b'type'])).reshape(o[b'shape'])
+    if b'numpy' in o:
+        return np.frombuffer(o[b'data'], dtype=np.dtype(o[b'type'])).reshape(o[b'shape'])
     return o

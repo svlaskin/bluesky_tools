@@ -93,7 +93,7 @@ class ActiveWaypoint(Entity, replaceable=True):
         # Avoid circling by checking too close to waypoint based on ground speed, assumption using vicinity criterion:
         # flying away and within 4 sec distance based on ground speed (4 sec = sensitivity tuning parameter)
 
-        close2wp = dist/(np.maximum(0.0001,np.abs(bs.traf.gs)))<4.0 # Waypoint is within 4 seconds flight time
+        close2wp = dist/(np.maximum(0.0001,np.abs(bs.traf.gs)))< 4 # Waypoint is within 4 seconds flight time
         tooclose2turn = close2wp*(np.abs(degto180(bs.traf.trk % 360. - qdr % 360.)) > 90.)
 
         # When too close to waypoint or we have passed the active waypoint, based on leg direction,switch active waypoint

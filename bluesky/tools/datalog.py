@@ -65,6 +65,8 @@ def reset():
     # Close all logs and remove reference to its file object
     for log in allloggers.values():
         log.reset()
+    # allloggers.clear()
+    # periodicloggers.clear()
 
 
 def makeLogfileName(logname, prefix: str = ''):
@@ -191,6 +193,7 @@ class CSVLogger:
             # log the data to file
             np.savetxt(self.file, np.vstack(txtdata).T,
                        delimiter=',', newline='\n', fmt='%s')
+            self.file.flush() # attempt to fix
 
     def start(self, prefix: str = ''):
         """ Start this logger. """

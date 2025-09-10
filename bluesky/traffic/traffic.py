@@ -155,6 +155,14 @@ class Traffic(Entity):
             self.eps    = np.array([])  # Small nonzero numbers
             self.work   = np.array([])  # Work done throughout the flight
 
+            # Added for pad logic
+            self.phase = np.array([])
+            self.assigned_pad = np.array([])
+
+            # for reached_wpt status
+            self.fafreach = np.array([])
+            self.phase = np.array([])
+
         # Default bank angles per flight phase
         self.bphase = np.deg2rad(np.array([15, 35, 35, 35, 15, 45]))
 
@@ -275,6 +283,8 @@ class Traffic(Entity):
         # Miscallaneous
         self.coslat[-n:] = np.cos(np.radians(aclat))  # Cosine of latitude for flat-earth aproximations
         self.eps[-n:] = 0.01
+        self.fafreach[-n:] = 0
+        self.phase[-n:] = 0
 
         # Finally call create for child TrafficArrays. This only needs to be done
         # manually in Traffic.
