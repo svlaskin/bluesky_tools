@@ -25,13 +25,13 @@ import itertools
 import numpy as np
 import shapely
 
-from JP1_files.envimport import (
-    get_city_center,
-    get_city_bounding_box,
-    get_overpass_city_name,
-    envimport,
-    write_to_csv,
-)
+# from JP1_files.envimport import (
+#     get_city_center,
+#     get_city_bounding_box,
+#     get_overpass_city_name,
+#     envimport,
+#     write_to_csv,
+# )
 
 from JP1_files.ODgen import *
 
@@ -141,52 +141,8 @@ class AmsSpawn(Entity):
         route, takeoff_loc, del_loc, return_loc, reso, pad_num, reso_needed, takeoff_pads, landing_pads, fafs, routelen  = quick_OD_gen()
         stack.stack(f"CRE EXP{self.last_id} M600 {takeoff_loc[0]} {takeoff_loc[1]} 0 0 0")
         stack.stack(f"set_pad {self.last_id} {pad_num}")
-        # traf.phase = np.append(traf.phase, "initial")
-        # asas
-        # stack.stack("asas on")
-        # traf.wpt_reached[self.last_id] = 0
-        # stack.stack(f"rpz {2/nm}")
-        # stack.stack(f"dtlook 3")
 
         faf_loc = fafs[pad_num]
-        # # draw pads and fafs
-        # ipadt, ipadl, ifaf = 0, 0, 0
-        # bearings_mid = [0, 90, 180,270] # middle of bearing line per pad
-        # for pad in takeoff_pads:
-        #     stack.stack(f"CIRCLE T{ipadt} {pad[0]} {pad[1]} {5/nm}")
-        #     stack.stack(f"COLOR T{ipadt} GREEN")
-        #     ipadt+=1
-        # for pad in landing_pads:
-        #     stack.stack(f"CIRCLE L{ipadl} {pad[0]} {pad[1]} {5/nm}")
-        #     stack.stack(f"COLOR L{ipadl} RED")
-        #     ipadl+=1
-        # for faf in fafs:
-        #     # draw FAF
-        #     stack.stack(f"CIRCLE F{ifaf} {faf[0]} {faf[1]} {2.5/nm}")
-        #     stack.stack(f"COLOR F{ifaf} RED")
-        #     # draw the approach lines
-        #     line_end_left = get_point_at_distance(lat1=faf[0], lon1=faf[1], d=1.852, bearing=bearings_mid[ifaf]-delta_iaf)
-        #     line_end_right = get_point_at_distance(lat1=faf[0], lon1=faf[1], d=1.852, bearing=bearings_mid[ifaf]+delta_iaf)
-        #     stack.stack(f"LINE LL{ifaf} {faf[0]} {faf[1]} {line_end_left[0]} {line_end_left[1]}")
-        #     stack.stack(f"LINE LR{ifaf} {faf[0]} {faf[1]} {line_end_right[0]} {line_end_right[1]}")
-        #     stack.stack(f"COLOR LR{ifaf} red")
-        #     stack.stack(f"COLOR LL{ifaf} red")
-
-        #     angles = np.linspace(bearings_mid[ifaf]-delta_iaf,bearings_mid[ifaf]+delta_iaf,10)
-        #     lat_iaf, lon_iaf = get_point_at_distance(faf[0], faf[1], 1.852, angles)
-
-        #     command = f'POLYLINE FB{ifaf}'
-        #     for i in range(0,len(lat_iaf)):
-        #         command += ' '+str(lat_iaf[i])+' '
-        #         command += str(lon_iaf[i])
-        #     bs.stack.stack(command)
-        #     stack.stack(f"COLOR FB{ifaf} red")
-
-        #     # arc = 
-        #     # draw lines
-        #     # draw arc for the inlet
-        #     ifaf+=1 # increment
-
         # climb out
         stack.stack(f"EXP{self.last_id} alt {cruisealt_out}")
         # once transitioned speed out

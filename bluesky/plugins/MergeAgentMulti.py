@@ -32,15 +32,17 @@ from bluesky_tools.bluesky.sac_cr_att.actor import MultiHeadAdditiveActorBasic
 from bluesky_tools.bluesky.sac_cr_att.critic_q import MultiHeadAdditiveCriticQv3Basic
 from bluesky_tools.bluesky.sac_cr_att.SAC import SAC
 from bluesky_tools.bluesky.sac_cr_att.replay_buffer import ReplayBuffer
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from JP1_files.ODgen import kwikqdrdist_matrix2
-from JP1_files.envimport import (
-    get_city_center,
-    get_city_bounding_box,
-    get_overpass_city_name,
-    envimport,
-    write_to_csv,
-)
+# from JP1_files.envimport import (
+#     get_city_center,
+#     get_city_bounding_box,
+#     get_overpass_city_name,
+#     envimport,
+#     write_to_csv,
+# )
 
 from JP1_files.ODgen import *
 
@@ -116,20 +118,12 @@ class MergeAgentMulti(Entity):
         # critic_q_target.load_state_dict(torch.load(f"{weights_folder}/qf_target.pt"))
         # # print("MODELS LOADED")
 
-        
-        # sac = SAC(
-        #     action_dim=action_dim,
-        #     buffer=buffer,
-        #     actor=self.actor,
-        #     critic_q=critic_q,
-        #     critic_q_target=critic_q_target
-        #     )
-
-        # self.traf.fafreach = np.zeros_like(wpt_dist)
-        # print("correct one loaded, so why the print")
-        # algorithm = SAC
-        # self.model = algorithm.load("//Users/sasha/Documents/Code/clean_bluesky/JP1_files/models/model_mp_SAC_5drones_j1_4.zip")
-        # route, takeoff_loc, del_loc, return_loc, reso, pad_num, reso_needed, takeoff_pads, landing_pads, fafs  = quick_OD_gen()
+        action_dim = 2
+                    
+        # # load model for N_veh
+        self.actor = MultiHeadAdditiveActorBasic(q_dim=3, kv_dim=7, out_dim=action_dim, num_heads=3)
+        weights_folder = "/Users/sasha/Documents/Code/multiagent_merge/bluesky-gym/sac_cr_att_sas_vlim_20"
+        self.actor.load_state_dict(torch.load(f"{weights_folder}/actor.pt"))
 
     def bound_angle_positive_negative_180(self, angles_deg: np.ndarray) -> np.ndarray:
         # Convert input to a numpy array if it isn't already
@@ -376,13 +370,13 @@ class MergeAgentMulti(Entity):
                     #   n_agents = n_veh,
                     #   size = int(4e6),
                     #   batch_size = 1024)
-                    self.actor = MultiHeadAdditiveActorBasic(q_dim=3, kv_dim=7, out_dim=action_dim, num_heads=3)
+                    # self.actor = MultiHeadAdditiveActorBasic(q_dim=3, kv_dim=7, out_dim=action_dim, num_heads=3) #FALLBACK 1
                     # critic_q = MultiHeadAdditiveCriticQv3Basic(q_dim=5, kv_dim=7, num_heads=3)
                     # critic_q_target = MultiHeadAdditiveCriticQv3Basic(q_dim=5, kv_dim=7, num_heads=3)
                     # weights_folder = "/Users/sasha/Documents/Code/multiagent_merge/bluesky-gym/sac_cr_att_sas_vlim_20" # for merge
-                    weights_folder = "/Users/sasha/Documents/Code/multiagent_merge/bluesky-gym/sac_cr_att_sas_vlim_20"
+                    # weights_folder = "/Users/sasha/Documents/Code/multiagent_merge/bluesky-gym/sac_cr_att_sas_vlim_20" # FALLBACK 2
                     # # weights_folder = "/Users/sasha/Documents/Code/multiagent_merge/bluesky-gym/sac_cr_att_per_clean" # for CR
-                    self.actor.load_state_dict(torch.load(f"{weights_folder}/actor.pt"))
+                    # self.actor.load_state_dict(torch.load(f"{weights_folder}/actor.pt")) # FALLBACK 3
                     # critic_q.load_state_dict(torch.load(f"{weights_folder}/qf.pt"))
                     # critic_q_target.load_state_dict(torch.load(f"{weights_folder}/qf_target.pt"))
                     # # print("MODELS LOADED")

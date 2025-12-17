@@ -5,7 +5,7 @@ from bluesky.traffic.asas import ConflictResolution
 
 
 class MVP(ConflictResolution):
-    ''' Conflict resolution using the Modified Voltage Potential Method. '''
+    ''' Conflict resolution using the Modified Voltage Potential Method. (with position noise) '''
     def __init__(self):
         super().__init__()
         # [-] switch to limit resolution to the horizontal direction
@@ -16,7 +16,6 @@ class MVP(ConflictResolution):
         self.swresohdg = False
         # [-] switch to limit resolution to the vertical direction
         self.swresovert = False
-
     def setprio(self, flag=None, priocode=''):
         '''Set the prio switch and the type of prio '''
         if flag is None:
@@ -34,7 +33,45 @@ class MVP(ConflictResolution):
         if priocode not in options:
             return False, "Priority code Not Understood. Available Options: " + str(options)
         return super().setprio(flag, priocode)
+    
+    def _dump_action_data(self, dv1, dv2, v1, path_to_dump=None):
+        """
+        dv1, dv2: horizontal resolution components from MVP (x, y)
+        v1: current horizontal velocity vector [vx, vy] of ownship
+        """
+        import csv, os
+        import numpy as np
 
+        if path_to_dump is None:
+            path_to_dump = "/Users/sasha/Documents/Code/pettingzoo_multiuse/logs_unc_cr_35std_trained_f/mvp_action_dump.csv"
+
+        # Current horizontal velocity
+        vx, vy = v1[0], v1[1]
+
+        # Resolution vector
+        dv = np.array([dv1, dv2])
+
+        # New velocity after resolution
+        v_new = np.array([vx, vy]) + dv
+
+        # Speed change (magnitude of horizontal resolution)
+        speed_change = np.linalg.norm(dv)
+
+        # Heading change
+        heading_current = np.degrees(np.arctan2(vx, vy)) % 360
+        heading_new     = np.degrees(np.arctan2(v_new[0], v_new[1])) % 360
+        heading_change  = ((heading_new - heading_current + 180) % 360) - 180  # signed [-180, 180]
+
+        # Write to CSV
+        write_header = not os.path.exists(path_to_dump)
+        with open(path_to_dump, "a", newline="") as f:
+            writer = csv.writer(f)
+            if write_header:
+                writer.writerow(["speed_change", "heading_change"])
+            writer.writerow([speed_change, heading_change])
+
+
+        
     @stack.command(name="RMETHH")
     def setresometh(self, value:'txt'=''):
         """ Processes the RMETHH command. Sets swresovert = False"""
@@ -347,5 +384,9 @@ class MVP(ConflictResolution):
 
         # combine the dv components
         dv = np.array([dv1, dv2, dv3])
+
+        # dump actions
+        print("doompit")
+        self._dump_action_data(dv1=dv1, dv2=dv2, v1=v1, path_to_dump="/Users/sasha/Documents/Code/pettingzoo_multiuse/logs_unc_cr_35std_trained_f/mvp_action_dump/mvp_actions.csv")
 
         return dv, tsolV
