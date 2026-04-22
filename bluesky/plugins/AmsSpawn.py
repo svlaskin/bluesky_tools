@@ -92,6 +92,10 @@ class AmsSpawn(Entity):
         # draw pads and fafs
         ipadt, ipadl, ifaf = 0, 0, 0
         self.inter_flight_margin = float(inter_flight_margin)
+        # delay distribution parameters
+        self.t0 = 10.0          # seconds
+        self.sigma = uncertainty/10
+        self.mu = np.log(100 - self.t0) - 0.5 * self.sigma**2  # mean ≈ 60 s
         bearings_mid = [0, 90, 180, 270] # middle of bearing line per pad
         for pad in takeoff_pads:
             stack.stack(f"CIRCLE T{ipadt} {pad[0]} {pad[1]} {5/nm}")
@@ -155,8 +159,13 @@ class AmsSpawn(Entity):
         stack.stack(f"EXP{self.last_id} vnav off")
         stack.stack(f"ADDWPTMODE EXP{self.last_id} FLYOVER")
         stack.stack(f"EXP{self.last_id} DEST {del_loc[0]} {del_loc[1]}")
+
+        # compute loiter time including delay
+        loiter_time =  self.t0 + np.random.lognormal(self.mu, self.sigma, size=1)
+        loiter_time = np.clip(loiter_time, None, 600) # max delay
+
         # to do at delivery location
-        do_at_delloc = [
+        do_at_delloc_1 = [
                         f"DELRTE EXP{self.last_id}",  # delete the final waypoint
                         f"EXP{self.last_id} spd 0",
                         f"set_phase EXP{self.last_id} 1", # set phase to return
@@ -168,8 +177,8 @@ class AmsSpawn(Entity):
                         # TODO: ADD FAF
 
                         # f"EXP{self.last_id} atspd 0, EXP{self.last_id} alt 0", # this is the critical alt one
-                        f"EXP{self.last_id} atalt 0, delay 10, alt EXP{self.last_id} {cruisealt_in}",
-                        f"EXP{self.last_id} atalt 0, delay 10, EXP{self.last_id} atalt {cruisealt_in}, EXP{self.last_id} spd {vcruise}",
+                        f"EXP{self.last_id} atalt 0, delay {loiter_time}, alt EXP{self.last_id} {cruisealt_in}",
+                        f"EXP{self.last_id} atalt 0, delay {loiter_time}, EXP{self.last_id} atalt {cruisealt_in}, EXP{self.last_id} spd {vcruise}",
                         # f"EXP{drone} vnav off",
                         # f"EXP{drone} lnav off",
                         f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]}, {4/nm}, spd EXP{self.last_id} 0",
@@ -190,17 +199,35 @@ class AmsSpawn(Entity):
                         f"EXP{self.last_id} atdist {faf_loc[0]} {faf_loc[1]} {20/nm}, EXP{self.last_id} spd 16",
                         f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {50/nm}, delrte EXP{self.last_id}",
                         f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {2/nm}, EXP{self.last_id} atalt 0 del EXP{self.last_id}",
+                        # and here it ends
                         # f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {5/nm}, EXP{self.last_id} vnav off",
                         # f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {5/nm}, EXP{self.last_id} lnav off",
                         # f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {85/nm}, spd EXP{self.last_id} 5"
                         # f"EXP{drone} atalt {self.cruisealt_in}, spd EXP{drone} {self.vcruise}"
                     ]
-
-        for command_at_delloc in do_at_delloc:
+        # do_at_delloc_2 = [
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]}, {5/nm}, EXP{self.last_id} atalt 0, del EXP{self.last_id}",
+        #                 f"EXP{self.last_id} atspd 0, EXP{self.last_id} alt 0",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {60/nm}, EXP{self.last_id} atspd 5, EXP{self.last_id} alt 0",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {60/nm}, EXP{self.last_id} vnav off",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {20/nm}, spd EXP{self.last_id} 5",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {20/nm}, EXP{self.last_id} lnav on",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {20/nm}, EXP{self.last_id} vnav on",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {3/nm}, spd EXP{self.last_id} 0",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {5/nm}, EXP{self.last_id} atalt 5 del EXP{self.last_id}",
+        #                 f"EXP{self.last_id} atdist {faf_loc[0]} {faf_loc[1]} {5/nm}, EXP{self.last_id} alt 30",
+        #                 f"EXP{self.last_id} atdist {faf_loc[0]} {faf_loc[1]} {20/nm}, EXP{self.last_id} spd 16",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {50/nm}, delrte EXP{self.last_id}",
+        #                 f"EXP{self.last_id} atdist {return_loc[0]} {return_loc[1]} {2/nm}, EXP{self.last_id} atalt 0 del EXP{self.last_id}"]
+        for command_at_delloc in do_at_delloc_1:
             stack.stack(
                     f"EXP{self.last_id} atdist {del_loc[0]} {del_loc[1]}, {50/nm}, {command_at_delloc}"
                 )
-
+        # T_loiter = t0 + np.random.lognormal(mu, sigma)
+        # for command_at_delloc in do_at_delloc_2:
+        #     stack.stack(
+        #             f"EXP{self.last_id} atdist {del_loc[0]} {del_loc[1]}, {50/nm}, delay {delay_at_parcel_center} {command_at_delloc}"
+        #         )
         self.last_id+=1 # increment IDs
         return 
     # inter_flight_margin = self.inter_flight_margin 
